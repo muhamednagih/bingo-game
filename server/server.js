@@ -4,14 +4,25 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const roomManager = require('./roomManager');
 
+const allowedOrigins = [
+    'https://bingo-game-sandy.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+];
+
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true
+}));
 
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: '*',
-        methods: ['GET', 'POST']
+        origin: allowedOrigins,
+        methods: ['GET', 'POST'],
+        credentials: true
     }
 });
 
@@ -96,3 +107,5 @@ const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
 });
+
+module.exports = server;

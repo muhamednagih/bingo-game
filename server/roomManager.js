@@ -102,7 +102,9 @@ function playTurn(roomId, playerId, number) {
     if (currentPlayer.id !== playerId) return { error: 'Not your turn.' };
 
     if (room.calledNumbers.includes(number)) return { error: 'Number already called.' };
-    if (number < 1 || number > 25) return { error: 'Invalid number.' };
+
+    const maxNumber = room.boardSize * room.boardSize;
+    if (number < 1 || number > maxNumber) return { error: `Invalid number. Must be between 1 and ${maxNumber}.` };
 
     room.calledNumbers.push(number);
 

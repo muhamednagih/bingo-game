@@ -32,7 +32,17 @@ export function useGame() {
             const savedRoomId = sessionStorage.getItem('bingoRoomId');
             if (savedRoomId) {
                 // Auto-reconnect if we have a saved room ID
-                socket.emit('rejoinActiveGame', { roomId: savedRoomId, playerId: getPlayerId() });
+                socket.emit('reconnectGame', { roomId: savedRoomId, playerId: getPlayerId() });
+            }
+        });
+
+        socket.on('rehydrateState', (playerState) => {
+            if (playerState && playerState.room) {
+                // The backend now sends { room, playerState: { ... } }
+                // We map this directly to roomState to instantly bypass Lobby
+                setRoomId(playerState.room.id);
+                setRoomState(playerState.room);
+                setError(null);
             }
         });
 
@@ -62,6 +72,15 @@ export function useGame() {
             setChatMessages((prev) => [...prev, msg]);
         });
 
+        socket.on('roomDestroyed', () => {
+            setRoomId(null);
+            sessionStorage.removeItem('bingoRoomId');
+            setRoomState(null);
+            setWinners(null);
+            setChatMessages([]);
+            setError("The Host has ended the game/disconnected. Room Destroyed.");
+        });
+
         return () => {
             socket.off('connect');
             socket.off('roomState');
@@ -69,11 +88,13 @@ export function useGame() {
             socket.off('error');
             socket.off('gameOver');
             socket.off('chatMessage');
+            socket.off('rehydrateState');
+            socket.off('roomDestroyed');
         };
     }, []);
 
     const createRoom = useCallback((id, name, maxPlayers, boardSize) => {
-        socket.emit('joinRoom', { roomId: id, playerName: name, maxPlayers, boardSize, playerId: getPlayerId() });
+        socket.emit('createRoom', { roomId: id, playerName: name, maxPlayers, boardSize, playerId: getPlayerId() });
         setRoomId(id);
         sessionStorage.setItem('bingoRoomId', id);
     }, []);

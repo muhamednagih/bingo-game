@@ -10,26 +10,30 @@ function getRoom(roomId) {
     return rooms[roomId];
 }
 
-function createRoom(roomId, maxPlayers = 4, boardSize = 5) {
-    if (!rooms[roomId]) {
-        const pMaxPlayers = parseInt(maxPlayers) || 4;
-        const pBoardSize = parseInt(boardSize) || 5;
-        rooms[roomId] = {
-            id: roomId,
-            players: [],
-            status: 'waiting',
-            turnIndex: 0,
-            calledNumbers: [],
-            maxPlayers: pMaxPlayers,
-            boardSize: pBoardSize,
-            requiredLines: Math.min(pBoardSize, 8)
-        };
-    }
-    return rooms[roomId];
+function createRoom(roomId, maxPlayers = 4, boardSize = 5, hostPlayerId = null) {
+    if (rooms[roomId]) return { error: 'Room already exists.' };
+
+    const pMaxPlayers = parseInt(maxPlayers) || 4;
+    const pBoardSize = parseInt(boardSize) || 5;
+
+    rooms[roomId] = {
+        id: roomId,
+        hostId: hostPlayerId, // Track the creator of the room
+        players: [],
+        status: 'waiting',
+        turnIndex: 0,
+        calledNumbers: [],
+        maxPlayers: pMaxPlayers,
+        boardSize: pBoardSize,
+        requiredLines: Math.min(pBoardSize, 8)
+    };
+
+    return { room: rooms[roomId] };
 }
 
-function joinRoom(roomId, player, maxPlayers = 4, boardSize = 5) {
-    const room = createRoom(roomId, maxPlayers, boardSize);
+function joinRoom(roomId, player) {
+    const room = rooms[roomId];
+    if (!room) return { error: 'Invalid Room Code.' };
 
     // Check if the player is already in the room (by playerId OR exact playerName)
     const existingPlayer = room.players.find(p => p.playerId === player.playerId || p.name === player.name);
@@ -48,7 +52,7 @@ function joinRoom(roomId, player, maxPlayers = 4, boardSize = 5) {
             board: [],
             lines: 0,
             ready: false,
-            isConnected: true
+            isOffline: false
         });
     } else {
         // Player is returning (reconnecting). Update their socket id and connection status.
@@ -56,21 +60,32 @@ function joinRoom(roomId, player, maxPlayers = 4, boardSize = 5) {
         existingPlayer.id = player.id;
         // If they changed persistent ID but used the exact same name, sync the new ID
         existingPlayer.playerId = player.playerId;
-        existingPlayer.isConnected = true;
+        existingPlayer.isOffline = false;
     }
 
     return { room };
 }
 
-function rejoinActiveGame(roomId, socketId, playerId) {
+function reconnectGame(roomId, socketId, playerId) {
     const room = rooms[roomId];
     if (!room) return null;
 
     const existingPlayer = room.players.find(p => p.playerId === playerId);
     if (existingPlayer) {
         existingPlayer.id = socketId;
-        existingPlayer.isConnected = true;
-        return room;
+        existingPlayer.isOffline = false;
+        return {
+            room,
+            playerState: {
+                board: existingPlayer.board,
+                calledNumbers: room.calledNumbers,
+                lines: existingPlayer.lines,
+                status: room.status,
+                turnIndex: room.turnIndex,
+                maxPlayers: room.maxPlayers,
+                boardSize: room.boardSize
+            }
+        };
     }
     return null;
 }
@@ -79,16 +94,24 @@ function leaveRoom(roomId, socketId, forceRemove = false) {
     const room = rooms[roomId];
     if (!room) return null;
 
+    let playerObj = room.players.find(p => p.id === socketId);
+    let isHost = playerObj && playerObj.playerId === room.hostId;
+
+    if (isHost && forceRemove) {
+        // Host has explicitly clicked 'Back to Home' or ended the game
+        delete rooms[roomId];
+        return { destroyed: true };
+    }
+
     if (room.status === 'playing' && !forceRemove) {
         // Just mark as disconnected to allow reconnection
-        const player = room.players.find(p => p.id === socketId);
-        if (player) player.isConnected = false;
+        if (playerObj) playerObj.isOffline = true;
     } else {
         // Actually remove them
         room.players = room.players.filter(p => p.id !== socketId);
     }
 
-    if (room.players.length === 0 || room.players.every(p => !p.isConnected)) {
+    if (room.players.length === 0 || room.players.every(p => p.isOffline)) {
         delete rooms[roomId];
     } else if (room.status === 'playing' && forceRemove) {
         if (room.turnIndex >= room.players.length) {
@@ -185,5 +208,5 @@ module.exports = {
     toggleReady,
     playTurn,
     resetRoom,
-    rejoinActiveGame
+    reconnectGame
 };

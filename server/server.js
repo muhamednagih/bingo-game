@@ -36,11 +36,11 @@ io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
     // A player wants to join (or create) a room
-    socket.on('joinRoom', ({ roomId, playerName, maxPlayers, boardSize }) => {
+    socket.on('joinRoom', ({ roomId, playerName, maxPlayers, boardSize, sessionId }) => {
         // If maxPlayers/boardSize are provided, it implies they are trying to dictate room creation settings.
         const parsedMaxPlayers = maxPlayers ? parseInt(maxPlayers, 10) : 4;
         const parsedBoardSize = boardSize ? parseInt(boardSize, 10) : 5;
-        const res = roomManager.joinRoom(roomId, { id: socket.id, name: playerName }, parsedMaxPlayers, parsedBoardSize);
+        const res = roomManager.joinRoom(roomId, { id: socket.id, name: playerName, sessionId }, parsedMaxPlayers, parsedBoardSize);
         if (res.error) {
             socket.emit('error', res.error);
             return;
@@ -48,6 +48,15 @@ io.on('connection', (socket) => {
         socket.join(roomId);
         socketRooms[socket.id] = roomId;
         io.to(roomId).emit('roomState', res.room);
+    });
+
+    socket.on('reconnectSession', ({ roomId, sessionId }) => {
+        const room = roomManager.reconnectSession(roomId, socket.id, sessionId);
+        if (room) {
+            socket.join(roomId);
+            socketRooms[socket.id] = roomId;
+            io.to(roomId).emit('roomState', room);
+        }
     });
 
     socket.on('toggleReady', (roomId) => {
@@ -69,8 +78,8 @@ io.on('connection', (socket) => {
 
         io.to(roomId).emit('roomState', res.room);
 
-        if (res.winner) {
-            io.to(roomId).emit('gameOver', { winner: res.winner });
+        if (res.winners && res.winners.length > 0) {
+            io.to(roomId).emit('gameOver', { winners: res.winners });
         }
     });
 
@@ -90,11 +99,20 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('leaveRoom', (roomId) => {
+        const room = roomManager.leaveRoom(roomId, socket.id, true); // force remove
+        if (room) {
+            io.to(roomId).emit('roomState', room);
+        }
+        socket.leave(roomId);
+        delete socketRooms[socket.id];
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
         const roomId = socketRooms[socket.id];
         if (roomId) {
-            const room = roomManager.leaveRoom(roomId, socket.id);
+            const room = roomManager.leaveRoom(roomId, socket.id, false); // allow reconnect
             if (room) {
                 io.to(roomId).emit('roomState', room);
             }

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Trophy, RotateCcw } from 'lucide-react';
 
-export default function WinnerModal({ winner, onRestart, isHost }) {
-    if (!winner) return null;
+export default function WinnerModal({ winners, onRestart, isHost }) {
+    if (!winners || winners.length === 0) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-500">
@@ -17,7 +17,7 @@ export default function WinnerModal({ winner, onRestart, isHost }) {
                 </h2>
 
                 <p className="text-xl text-center text-gray-300 mb-8 mt-2">
-                    <span className="font-bold text-accent">{winner.name}</span> wins the game!
+                    <span className="font-bold text-accent">{winners.map(w => w.name).join(', ')}</span> win{winners.length > 1 ? '' : 's'} the game!
                 </p>
 
                 <div className="flex w-full mt-4">

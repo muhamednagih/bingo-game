@@ -1,4 +1,5 @@
 import React from 'react';
+import { Home } from 'lucide-react';
 import { useGame } from './useGame';
 import Lobby from './components/Lobby';
 import Room from './components/Room';
@@ -12,14 +13,15 @@ function App() {
         roomState,
         playerId,
         error,
-        winner,
+        winners,
         chatMessages,
         createRoom,
         joinRoom,
         toggleReady,
         playTurn,
         sendMessage,
-        restartGame
+        restartGame,
+        leaveRoom
     } = useGame();
 
     const isPlaying = roomState?.status === 'playing';
@@ -32,7 +34,16 @@ function App() {
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] pointer-events-none"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-accent/20 rounded-full blur-[100px] pointer-events-none"></div>
 
-            <header className="mb-8 z-10 text-center">
+            <header className="mb-8 z-10 text-center relative w-full flex items-center justify-center min-h-[4rem]">
+                {roomId && (
+                    <button
+                        onClick={leaveRoom}
+                        className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center bg-gray-800 hover:bg-red-500/80 text-white px-4 py-2 rounded-xl transition-all shadow-[0_0_10px_rgba(255,255,255,0.05)] hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] z-20"
+                    >
+                        <Home className="w-5 h-5 mr-2" />
+                        <span className="hidden sm:inline font-semibold">Back to Home</span>
+                    </button>
+                )}
                 <h1 className="text-5xl md:text-6xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-primary via-blue-400 to-accent drop-shadow-glow flex items-center justify-center">
                     BINGO
                     <span className="ml-3 text-2xl md:text-3xl text-gray-400 font-normal tracking-normal non-italic">Arena</span>
@@ -68,8 +79,8 @@ function App() {
                 )}
             </main>
 
-            {winner && (
-                <WinnerModal winner={winner} onRestart={restartGame} isHost={false} />
+            {winners && (
+                <WinnerModal winners={winners} onRestart={restartGame} isHost={false} />
             )}
 
             {roomId && (

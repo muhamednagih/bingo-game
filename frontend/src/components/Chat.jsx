@@ -4,11 +4,27 @@ import { Send, MessageSquare } from 'lucide-react';
 export default function Chat({ messages, onSendMessage }) {
     const [msg, setMsg] = useState('');
     const [isOpen, setIsOpen] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
     const endRef = useRef(null);
 
+    // Initial scroll setup
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, isOpen]);
+
+    // Track unread messages
+    useEffect(() => {
+        if (!isOpen && messages.length > 0) {
+            setUnreadCount(prev => prev + 1);
+        }
+    }, [messages]);
+
+    // Reset unread count when opening
+    useEffect(() => {
+        if (isOpen) {
+            setUnreadCount(0);
+        }
+    }, [isOpen]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -25,9 +41,9 @@ export default function Chat({ messages, onSendMessage }) {
                 className="fixed bottom-6 right-6 p-4 bg-primary text-white rounded-full shadow-glow hover:scale-110 transition-transform z-50 flex items-center justify-center"
             >
                 <MessageSquare className="w-6 h-6" />
-                {messages.length > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-accent text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center animate-bounce">
-                        {messages.length}
+                {unreadCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-accent text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center animate-bounce shadow-lg">
+                        {unreadCount}
                     </span>
                 )}
             </button>

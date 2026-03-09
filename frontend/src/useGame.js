@@ -2,6 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { playWin } from './utils/sounds';
 
+const getSessionId = () => {
+    let sid = localStorage.getItem('bingoSessionId');
+    if (!sid) {
+        sid = Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('bingoSessionId', sid);
+    }
+    return sid;
+};
+
 const socket = io('https://unmoderated-felecia-unadjunctively.ngrok-free.dev', {
     withCredentials: true,
     extraHeaders: {
@@ -15,11 +24,16 @@ export function useGame() {
     const [error, setError] = useState(null);
     const [playerId, setPlayerId] = useState(null);
     const [chatMessages, setChatMessages] = useState([]);
-    const [winner, setWinner] = useState(null);
+    const [winners, setWinners] = useState(null);
 
     useEffect(() => {
         socket.on('connect', () => {
             setPlayerId(socket.id);
+            const savedRoomId = sessionStorage.getItem('bingoRoomId');
+            if (savedRoomId) {
+                // Auto-reconnect if we have a saved room ID
+                socket.emit('reconnectSession', { roomId: savedRoomId, sessionId: getSessionId() });
+            }
         });
 
         socket.on('roomState', (state) => {
@@ -29,14 +43,15 @@ export function useGame() {
 
         socket.on('roomCreated', (id) => {
             setRoomId(id);
+            sessionStorage.setItem('bingoRoomId', id);
         });
 
         socket.on('error', (msg) => {
             setError(msg);
         });
 
-        socket.on('gameOver', ({ winner }) => {
-            setWinner(winner);
+        socket.on('gameOver', ({ winners }) => {
+            setWinners(winners);
             playWin();
         });
 
@@ -55,13 +70,15 @@ export function useGame() {
     }, []);
 
     const createRoom = useCallback((id, name, maxPlayers, boardSize) => {
-        socket.emit('joinRoom', { roomId: id, playerName: name, maxPlayers, boardSize });
+        socket.emit('joinRoom', { roomId: id, playerName: name, maxPlayers, boardSize, sessionId: getSessionId() });
         setRoomId(id);
+        sessionStorage.setItem('bingoRoomId', id);
     }, []);
 
     const joinRoom = useCallback((id, name) => {
-        socket.emit('joinRoom', { roomId: id, playerName: name });
+        socket.emit('joinRoom', { roomId: id, playerName: name, sessionId: getSessionId() });
         setRoomId(id);
+        sessionStorage.setItem('bingoRoomId', id);
     }, []);
 
     const toggleReady = useCallback(() => {
@@ -79,7 +96,19 @@ export function useGame() {
     const restartGame = useCallback(() => {
         if (roomId) {
             socket.emit('restartGame', roomId);
-            setWinner(null);
+            setWinners(null);
+        }
+    }, [roomId]);
+
+    const leaveRoom = useCallback(() => {
+        if (roomId) {
+            socket.emit('leaveRoom', roomId);
+            setRoomId(null);
+            sessionStorage.removeItem('bingoRoomId');
+            setRoomState(null);
+            setWinners(null);
+            setChatMessages([]);
+            setError(null);
         }
     }, [roomId]);
 
@@ -89,13 +118,14 @@ export function useGame() {
         roomState,
         playerId,
         error,
-        winner,
+        winners,
         chatMessages,
         createRoom,
         joinRoom,
         toggleReady,
         playTurn,
         sendMessage,
-        restartGame
+        restartGame,
+        leaveRoom
     };
 }

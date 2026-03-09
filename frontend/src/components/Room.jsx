@@ -28,30 +28,31 @@ export default function Room({ roomState, roomId, playerId, onToggleReady }) {
                 </p>
             </div>
 
-            <div className={`grid gap-4 w-full mb-8 ${roomState.maxPlayers <= 4 ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-2 lg:grid-cols-5'}`}>
+            <div className="flex flex-col gap-4 w-full max-w-md mx-auto mb-8">
                 {Array.from({ length: roomState.maxPlayers }).map((_, index) => {
                     const p = players[index];
                     if (p) {
                         return (
-                            <div key={p.id} className="bg-gray-800 p-4 rounded-xl border border-gray-600 flex flex-col items-center relative overflow-hidden">
-                                <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 text-2xl font-bold
+                            <div key={p.id} className="bg-gray-800 p-4 rounded-xl border border-gray-600 flex flex-row items-center justify-between relative overflow-hidden h-20">
+                                <div className="flex items-center flex-1 min-w-0">
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-4 text-xl font-bold
                   ${p.ready ? 'bg-success text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-gray-700 text-gray-400'}`}>
-                                    {p.name.charAt(0).toUpperCase()}
+                                        {p.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <span className="font-semibold text-white truncate max-w-[150px]">{p.name} {p.id === playerId && '(You)'}</span>
                                 </div>
-                                <span className="font-semibold text-white truncate w-full text-center">{p.name}</span>
-                                {p.ready ? (
-                                    <span className="text-xs text-success flex items-center mt-2 font-bold"><CheckCircle className="w-3 h-3 mr-1" /> Ready</span>
-                                ) : (
-                                    <span className="text-xs text-gray-400 flex items-center mt-2"><Clock className="w-3 h-3 mr-1" /> Waiting</span>
-                                )}
-                                {p.id === playerId && (
-                                    <div className="absolute top-2 right-2 text-xs bg-primary text-white px-2 py-0.5 rounded-full font-bold">You</div>
-                                )}
+                                <div className="flex-shrink-0 ml-4">
+                                    {p.ready ? (
+                                        <span className="text-sm text-success text-right flex items-center font-bold"><CheckCircle className="w-4 h-4 mr-1" /> Ready</span>
+                                    ) : (
+                                        <span className="text-sm text-gray-400 text-right flex items-center"><Clock className="w-4 h-4 mr-1" /> Waiting</span>
+                                    )}
+                                </div>
                             </div>
                         );
                     }
                     return (
-                        <div key={`empty-${index}`} className="bg-gray-800/50 p-4 rounded-xl border border-gray-700 border-dashed flex flex-col items-center justify-center min-h-[140px]">
+                        <div key={`empty-${index}`} className="bg-gray-800/50 p-4 rounded-xl border border-gray-700 border-dashed flex items-center justify-center h-20">
                             <span className="text-gray-500 font-medium">Empty Slot</span>
                         </div>
                     );

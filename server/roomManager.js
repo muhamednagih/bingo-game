@@ -28,41 +28,68 @@ function createRoom(roomId, maxPlayers = 4, boardSize = 5) {
 }
 
 function joinRoom(roomId, player, maxPlayers = 4, boardSize = 5) {
-    // createRoom only initializes the room if it doesn't already exist.
     const room = createRoom(roomId, maxPlayers, boardSize);
 
-    if (room.status !== 'waiting') return { error: 'Room is already in play.' };
-    if (room.players.length >= room.maxPlayers) return { error: 'Room is full.' };
+    // If the game started and the player is not returning, reject them
+    const existingPlayer = room.players.find(p => p.sessionId === player.sessionId);
+    if (!existingPlayer && room.status !== 'waiting') {
+        return { error: 'Room is already in play.' };
+    }
 
-    const existingPlayer = room.players.find(p => p.id === player.id);
     if (!existingPlayer) {
+        if (room.players.length >= room.maxPlayers) return { error: 'Room is full.' };
         room.players.push({
             id: player.id,
+            sessionId: player.sessionId,
             name: player.name,
             board: [],
             lines: 0,
-            ready: false
+            ready: false,
+            connected: true
         });
+    } else {
+        existingPlayer.id = player.id;
+        existingPlayer.name = player.name;
+        existingPlayer.connected = true;
     }
 
     return { room };
 }
 
-function leaveRoom(roomId, playerId) {
+function reconnectSession(roomId, playerId, sessionId) {
     const room = rooms[roomId];
     if (!room) return null;
 
-    room.players = room.players.filter(p => p.id !== playerId);
-    if (room.players.length === 0) {
+    const existingPlayer = room.players.find(p => p.sessionId === sessionId);
+    if (existingPlayer) {
+        existingPlayer.id = playerId;
+        existingPlayer.connected = true;
+        return room;
+    }
+    return null;
+}
+
+function leaveRoom(roomId, playerId, forceRemove = false) {
+    const room = rooms[roomId];
+    if (!room) return null;
+
+    if (room.status === 'playing' && !forceRemove) {
+        // Just mark as disconnected to allow reconnection
+        const player = room.players.find(p => p.id === playerId);
+        if (player) player.connected = false;
+    } else {
+        // Actually remove them
+        room.players = room.players.filter(p => p.id !== playerId);
+    }
+
+    if (room.players.length === 0 || room.players.every(p => !p.connected)) {
         delete rooms[roomId];
-    } else if (room.status === 'playing') {
-        // If a player leaves during game, we might end it or skip their turn.
-        // For simplicity, we keep the game going but skip them.
+    } else if (room.status === 'playing' && forceRemove) {
         if (room.turnIndex >= room.players.length) {
             room.turnIndex = 0;
         }
     }
-    return room;
+    return rooms[roomId] || null;
 }
 
 function toggleReady(roomId, playerId) {
@@ -108,23 +135,24 @@ function playTurn(roomId, playerId, number) {
 
     room.calledNumbers.push(number);
 
-    let winner = null;
+    let winners = [];
 
     // Update lines for all players
     room.players.forEach(p => {
         p.lines = checkLines(p.board, room.calledNumbers, room.boardSize);
         if (p.lines >= room.requiredLines) {
-            winner = p;
+            winners.push(p);
         }
     });
 
-    if (winner) {
+    if (winners.length > 0) {
         room.status = 'ended';
     } else {
         room.turnIndex = (room.turnIndex + 1) % room.players.length;
     }
 
-    return { room, winner };
+    // Always return an array (even if empty) to maintain consistency with frontend
+    return { room, winners: winners.length > 0 ? winners : null };
 }
 
 function resetRoom(roomId) {
@@ -150,5 +178,6 @@ module.exports = {
     leaveRoom,
     toggleReady,
     playTurn,
-    resetRoom
+    resetRoom,
+    reconnectSession
 };

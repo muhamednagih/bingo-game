@@ -46,7 +46,6 @@ function App() {
                 )}
                 <h1 className="text-5xl md:text-6xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-primary via-blue-400 to-accent drop-shadow-glow flex items-center justify-center">
                     BINGO
-                    <span className="ml-3 text-2xl md:text-3xl text-gray-400 font-normal tracking-normal non-italic">Arena</span>
                 </h1>
             </header>
 

@@ -36,11 +36,11 @@ io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
     // A player wants to join (or create) a room
-    socket.on('joinRoom', ({ roomId, playerName, maxPlayers, boardSize, sessionId }) => {
+    socket.on('joinRoom', ({ roomId, playerName, maxPlayers, boardSize, playerId }) => {
         // If maxPlayers/boardSize are provided, it implies they are trying to dictate room creation settings.
         const parsedMaxPlayers = maxPlayers ? parseInt(maxPlayers, 10) : 4;
         const parsedBoardSize = boardSize ? parseInt(boardSize, 10) : 5;
-        const res = roomManager.joinRoom(roomId, { id: socket.id, name: playerName, sessionId }, parsedMaxPlayers, parsedBoardSize);
+        const res = roomManager.joinRoom(roomId, { id: socket.id, name: playerName, playerId }, parsedMaxPlayers, parsedBoardSize);
         if (res.error) {
             socket.emit('error', res.error);
             return;
@@ -50,8 +50,8 @@ io.on('connection', (socket) => {
         io.to(roomId).emit('roomState', res.room);
     });
 
-    socket.on('reconnectSession', ({ roomId, sessionId }) => {
-        const room = roomManager.reconnectSession(roomId, socket.id, sessionId);
+    socket.on('rejoinActiveGame', ({ roomId, playerId }) => {
+        const room = roomManager.rejoinActiveGame(roomId, socket.id, playerId);
         if (room) {
             socket.join(roomId);
             socketRooms[socket.id] = roomId;

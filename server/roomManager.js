@@ -15,6 +15,7 @@ function createRoom(roomId, maxPlayers = 4, boardSize = 5) {
         const pMaxPlayers = parseInt(maxPlayers) || 4;
         const pBoardSize = parseInt(boardSize) || 5;
         rooms[roomId] = {
+            id: roomId,
             players: [],
             status: 'waiting',
             turnIndex: 0,
@@ -30,8 +31,8 @@ function createRoom(roomId, maxPlayers = 4, boardSize = 5) {
 function joinRoom(roomId, player, maxPlayers = 4, boardSize = 5) {
     const room = createRoom(roomId, maxPlayers, boardSize);
 
-    // Check if the player is already in the room (by sessionId OR exact playerName)
-    const existingPlayer = room.players.find(p => p.sessionId === player.sessionId || p.name === player.name);
+    // Check if the player is already in the room (by playerId OR exact playerName)
+    const existingPlayer = room.players.find(p => p.playerId === player.playerId || p.name === player.name);
 
     // If the game is not waiting, only allow returning players.
     if (!existingPlayer && room.status !== 'waiting') {
@@ -41,53 +42,53 @@ function joinRoom(roomId, player, maxPlayers = 4, boardSize = 5) {
     if (!existingPlayer) {
         if (room.players.length >= room.maxPlayers) return { error: 'Room is full.' };
         room.players.push({
-            id: player.id,
-            sessionId: player.sessionId,
+            id: player.id, // This is the socket ID
+            playerId: player.playerId, // This is the persistent ID
             name: player.name,
             board: [],
             lines: 0,
             ready: false,
-            connected: true
+            isConnected: true
         });
     } else {
         // Player is returning (reconnecting). Update their socket id and connection status.
         // We DO NOT reset their board or lines.
         existingPlayer.id = player.id;
-        // If they changed session ID but used the exact same name, sync the new session ID
-        existingPlayer.sessionId = player.sessionId;
-        existingPlayer.connected = true;
+        // If they changed persistent ID but used the exact same name, sync the new ID
+        existingPlayer.playerId = player.playerId;
+        existingPlayer.isConnected = true;
     }
 
     return { room };
 }
 
-function reconnectSession(roomId, playerId, sessionId) {
+function rejoinActiveGame(roomId, socketId, playerId) {
     const room = rooms[roomId];
     if (!room) return null;
 
-    const existingPlayer = room.players.find(p => p.sessionId === sessionId);
+    const existingPlayer = room.players.find(p => p.playerId === playerId);
     if (existingPlayer) {
-        existingPlayer.id = playerId;
-        existingPlayer.connected = true;
+        existingPlayer.id = socketId;
+        existingPlayer.isConnected = true;
         return room;
     }
     return null;
 }
 
-function leaveRoom(roomId, playerId, forceRemove = false) {
+function leaveRoom(roomId, socketId, forceRemove = false) {
     const room = rooms[roomId];
     if (!room) return null;
 
     if (room.status === 'playing' && !forceRemove) {
         // Just mark as disconnected to allow reconnection
-        const player = room.players.find(p => p.id === playerId);
-        if (player) player.connected = false;
+        const player = room.players.find(p => p.id === socketId);
+        if (player) player.isConnected = false;
     } else {
         // Actually remove them
-        room.players = room.players.filter(p => p.id !== playerId);
+        room.players = room.players.filter(p => p.id !== socketId);
     }
 
-    if (room.players.length === 0 || room.players.every(p => !p.connected)) {
+    if (room.players.length === 0 || room.players.every(p => !p.isConnected)) {
         delete rooms[roomId];
     } else if (room.status === 'playing' && forceRemove) {
         if (room.turnIndex >= room.players.length) {
@@ -184,5 +185,5 @@ module.exports = {
     toggleReady,
     playTurn,
     resetRoom,
-    reconnectSession
+    rejoinActiveGame
 };

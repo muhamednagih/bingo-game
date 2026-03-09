@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { playWin } from './utils/sounds';
 
-const socket = io(window.location.hostname === 'localhost' ? 'http://localhost:4000' : '/');
+const socket = io('https://unmoderated-felecia-unadjunctively.ngrok-free.dev');
 
 export function useGame() {
     const [roomId, setRoomId] = useState(null);

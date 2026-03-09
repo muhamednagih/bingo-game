@@ -30,8 +30,10 @@ function createRoom(roomId, maxPlayers = 4, boardSize = 5) {
 function joinRoom(roomId, player, maxPlayers = 4, boardSize = 5) {
     const room = createRoom(roomId, maxPlayers, boardSize);
 
-    // If the game started and the player is not returning, reject them
-    const existingPlayer = room.players.find(p => p.sessionId === player.sessionId);
+    // Check if the player is already in the room (by sessionId OR exact playerName)
+    const existingPlayer = room.players.find(p => p.sessionId === player.sessionId || p.name === player.name);
+
+    // If the game is not waiting, only allow returning players.
     if (!existingPlayer && room.status !== 'waiting') {
         return { error: 'Room is already in play.' };
     }
@@ -48,8 +50,11 @@ function joinRoom(roomId, player, maxPlayers = 4, boardSize = 5) {
             connected: true
         });
     } else {
+        // Player is returning (reconnecting). Update their socket id and connection status.
+        // We DO NOT reset their board or lines.
         existingPlayer.id = player.id;
-        existingPlayer.name = player.name;
+        // If they changed session ID but used the exact same name, sync the new session ID
+        existingPlayer.sessionId = player.sessionId;
         existingPlayer.connected = true;
     }
 

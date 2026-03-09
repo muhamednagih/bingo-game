@@ -3,7 +3,10 @@ import { io } from 'socket.io-client';
 import { playWin } from './utils/sounds';
 
 const socket = io('https://unmoderated-felecia-unadjunctively.ngrok-free.dev', {
-    withCredentials: true
+    withCredentials: true,
+    extraHeaders: {
+        'ngrok-skip-browser-warning': 'true'
+    }
 });
 
 export function useGame() {

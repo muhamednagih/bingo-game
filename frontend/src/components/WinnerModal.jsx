@@ -5,8 +5,21 @@ export default function WinnerModal({ winners, onRestart, isHost }) {
     if (!winners || winners.length === 0) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-500">
-            <div className="relative overflow-hidden bg-board max-w-sm w-full p-8 rounded-3xl shadow-[0_0_50px_rgba(236,72,153,0.3)] border border-pink-500/30 transform transition-all scale-100 hover:scale-[1.02]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-500">
+            {/* Fullscreen Fireworks Background */}
+            <video
+                src="/fireworks.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
+            />
+
+            {/* Fullscreen Dark Overlay */}
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-0 pointer-events-none"></div>
+
+            <div className="relative z-10 overflow-hidden bg-board max-w-sm w-full p-8 rounded-3xl shadow-[0_0_50px_rgba(236,72,153,0.3)] border border-pink-500/30 transform transition-all scale-100 hover:scale-[1.02]">
 
                 {/* Video Background */}
                 <video

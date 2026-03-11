@@ -1,7 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Trophy, RotateCcw } from 'lucide-react';
 
 export default function WinnerModal({ winners, onRestart, isHost }) {
+    useEffect(() => {
+        const audio = new Audio('/win-sound.mp3');
+
+        audio.play().catch(error => {
+            console.warn("Audio autoplay blocked or failed:", error);
+        });
+
+        return () => {
+            audio.pause();
+            audio.currentTime = 0;
+        };
+    }, []);
+
     if (!winners || winners.length === 0) return null;
 
     return (

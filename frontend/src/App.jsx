@@ -46,7 +46,7 @@ function App() {
                         <span className="hidden sm:inline font-semibold">Back to Home</span>
                     </button>
                 )}
-                <h1 
+                <h1
                     className="text-4xl md:text-5xl font-pixel tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 flex items-center justify-center mt-6"
                     style={{
                         WebkitTextStroke: '1px rgba(255,255,255,0.1)',
@@ -91,10 +91,10 @@ function App() {
             )}
 
             {roomId && (
-                <Chat 
-                    messages={chatMessages} 
-                    onSendMessage={sendMessage} 
-                    currentPlayerName={roomState?.players?.find(p => p.id === playerId)?.name} 
+                <Chat
+                    messages={chatMessages}
+                    onSendMessage={sendMessage}
+                    currentPlayerName={roomState?.players?.find(p => p.id === playerId)?.name}
                 />
             )}
 

@@ -26,7 +26,7 @@ export default function Lobby({ onCreate, onJoin }) {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center p-8 bg-board rounded-2xl shadow-xl border border-gray-700 w-full max-w-md">
+        <div className="flex flex-col items-center justify-center p-8 bg-board rounded-2xl shadow-xl border border-gray-700 w-full max-w-lg">
             {/* How to Play Card - Arabic */}
             <div 
                 dir="rtl" 
@@ -72,7 +72,7 @@ export default function Lobby({ onCreate, onJoin }) {
                     </div>
                 </div>
 
-                <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="pt-4 flex flex-col gap-6 w-full">
                     <div className="flex flex-col gap-4 bg-gray-800 p-4 rounded-xl border border-gray-600">
                         <h3 className="text-gray-300 font-semibold text-sm uppercase tracking-wider text-center border-b border-gray-700 pb-2">Host Settings</h3>
                         <div>
@@ -84,12 +84,13 @@ export default function Lobby({ onCreate, onJoin }) {
                                 <select
                                     value={maxPlayers}
                                     onChange={(e) => setMaxPlayers(parseInt(e.target.value))}
-                                    className="w-full appearance-none bg-gray-900 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors cursor-pointer pr-10"
+                                    className="w-full appearance-none bg-gray-900/80 backdrop-blur-md border border-gray-600 rounded-lg px-4 py-3 text-white font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all cursor-pointer pr-10 shadow-inner"
                                 >
-                                    <option value="2">2 Players</option>
-                                    <option value="3">3 Players</option>
-                                    <option value="4">4 Players</option>
-                                    <option value="5">5 Players</option>
+                                    {[2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                                        <option key={num} value={num} className="bg-gray-900 text-white font-medium py-2">
+                                            {num} Players
+                                        </option>
+                                    ))}
                                 </select>
                                 <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-400">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -107,12 +108,13 @@ export default function Lobby({ onCreate, onJoin }) {
                                 <select
                                     value={boardSize}
                                     onChange={(e) => setBoardSize(parseInt(e.target.value))}
-                                    className="w-full appearance-none bg-gray-900 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors cursor-pointer pr-10"
+                                    className="w-full appearance-none bg-gray-900/80 backdrop-blur-md border border-gray-600 rounded-lg px-4 py-3 text-white font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all cursor-pointer pr-10 shadow-inner"
                                 >
-                                    <option value="3">3x3 Grid</option>
-                                    <option value="4">4x4 Grid</option>
-                                    <option value="5">5x5 Grid</option>
-                                    <option value="6">6x6 Grid</option>
+                                    {[5, 6, 7, 8, 9, 10].map(size => (
+                                        <option key={size} value={size} className="bg-gray-900 text-white font-medium py-2">
+                                            {size}x{size} Grid
+                                        </option>
+                                    ))}
                                 </select>
                                 <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-400">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -130,7 +132,7 @@ export default function Lobby({ onCreate, onJoin }) {
                         </button>
                     </div>
 
-                    <div className="flex flex-col gap-4 bg-gray-800 p-4 rounded-xl border border-gray-600 justify-end">
+                    <div className="flex flex-col gap-4 bg-gray-800 p-4 rounded-xl border border-gray-600">
                         <h3 className="text-gray-300 font-semibold text-sm uppercase tracking-wider text-center border-b border-gray-700 pb-2">Join Room</h3>
                         <div className="flex flex-col gap-2 mt-auto">
                             <input

@@ -60,10 +60,7 @@ export default function Lobby({ onCreate, onJoin }) {
                     <div className="flex flex-col gap-4 bg-gray-800 p-4 rounded-xl border border-gray-600">
                         <h3 className="text-gray-300 font-semibold text-sm uppercase tracking-wider text-center border-b border-gray-700 pb-2">Host Settings</h3>
                         <div>
-                            <label className="flex justify-between text-sm font-medium text-gray-400 mb-1">
-                                <span>Players</span>
-                                <span className="text-primary font-bold">{maxPlayers}</span>
-                            </label>
+                            <label className="block text-sm font-medium text-gray-400 mb-1">Players</label>
                             <div className="relative">
                                 <select
                                     value={maxPlayers}
@@ -84,10 +81,7 @@ export default function Lobby({ onCreate, onJoin }) {
                             </div>
                         </div>
                         <div>
-                            <label className="flex justify-between text-sm font-medium text-gray-400 mb-1">
-                                <span>Board Size</span>
-                                <span className="text-primary font-bold">{boardSize}x{boardSize}</span>
-                            </label>
+                            <label className="block text-sm font-medium text-gray-400 mb-1">Board Size</label>
                             <div className="relative">
                                 <select
                                     value={boardSize}

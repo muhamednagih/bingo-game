@@ -27,22 +27,6 @@ export default function Lobby({ onCreate, onJoin }) {
 
     return (
         <div className="flex flex-col items-center justify-center p-8 bg-board rounded-2xl shadow-xl border border-gray-700 w-full max-w-lg">
-            {/* How to Play Card - Arabic */}
-            <div 
-                dir="rtl" 
-                className="w-full bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 mb-8 shadow-[0_0_15px_rgba(255,255,255,0.05)] text-center relative overflow-hidden"
-            >
-                {/* Subtle Glow Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 opacity-30 pointer-events-none"></div>
-                
-                <h3 className="text-xl font-bold text-white mb-2 relative z-10 flex text-center justify-center items-center">
-                    فكرة اللعبة ببساطة: 🎯
-                </h3>
-                <p className="text-gray-300 text-sm leading-relaxed relative z-10 font-medium">
-                    نافس صحابك في رومات برايفيت.. قفّل صفوف الأرقام (بالطول أو بالعرض) قبلهم،
-                    وأول واحد يجمّع عدد الصفوف المطلوبة بيضرب الـ <span className="text-primary font-black uppercase tracking-wider mx-1">BINGO</span> ويكسب الجيم! 🔥
-                </p>
-            </div>
 
             <h2 className="text-3xl font-bold flex flex-col items-center mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
                 <Users className="w-12 h-12 text-primary mb-3" />
@@ -153,6 +137,23 @@ export default function Lobby({ onCreate, onJoin }) {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* How to Play Card - Arabic */}
+            <div
+                dir="rtl"
+                className="w-full bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 mt-8 shadow-[0_0_15px_rgba(255,255,255,0.05)] text-center relative overflow-hidden"
+            >
+                {/* Subtle Glow Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 opacity-30 pointer-events-none"></div>
+
+                <h3 className="text-xl font-bold text-white mb-2 relative z-10 flex text-center justify-center items-center">
+                    فكرة اللعبة ببساطة: 🎯
+                </h3>
+                <p className="text-gray-300 text-sm leading-relaxed relative z-10 font-medium">
+                    نافس صحابك في رومات برايفيت.. قفّل صفوف الأرقام (بالطول أو بالعرض) قبلهم،
+                    وأول واحد يجمّع عدد الصفوف المطلوبة بيضرب الـ <span className="text-primary font-black uppercase tracking-wider mx-1">CHILLINGO</span> ويكسب الجيم! 🔥
+                </p>
             </div>
         </div>
     );

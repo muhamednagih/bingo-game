@@ -18,6 +18,21 @@ export default {
                 'glow': '0 0 10px rgba(59, 130, 246, 0.5)',
                 'glow-accent': '0 0 15px rgba(236, 72, 153, 0.7)',
                 'glow-success': '0 0 15px rgba(16, 185, 129, 0.7)',
+                'glow-gold': '0 0 15px rgba(255, 215, 0, 0.7)',
+            },
+            keyframes: {
+                twinkle: {
+                    '0%, 100%': { opacity: '0.3', transform: 'scale(1)' },
+                    '50%': { opacity: '1', transform: 'scale(1.1)' },
+                },
+                swing: {
+                    '0%, 100%': { transform: 'rotate(-5deg)' },
+                    '50%': { transform: 'rotate(5deg)' },
+                }
+            },
+            animation: {
+                twinkle: 'twinkle 3s ease-in-out infinite',
+                swing: 'swing 6s ease-in-out infinite',
             }
         },
     },

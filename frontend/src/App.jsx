@@ -6,6 +6,7 @@ import Room from './components/Room';
 import GameBoard from './components/GameBoard';
 import WinnerModal from './components/WinnerModal';
 import Chat from './components/Chat';
+import RamadanDecorations from './components/RamadanDecorations';
 
 function App() {
     const {
@@ -31,6 +32,7 @@ function App() {
         <div className="min-h-screen bg-background text-white flex flex-col items-center py-10 px-4 relative overflow-hidden">
 
             {/* Background decorations */}
+            <RamadanDecorations />
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] pointer-events-none"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-accent/20 rounded-full blur-[100px] pointer-events-none"></div>
 

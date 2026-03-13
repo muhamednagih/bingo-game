@@ -14,6 +14,9 @@ export default {
                 board: '#1e293b',
                 success: '#10b981',
             },
+            fontFamily: {
+                'pixel': ['"Press Start 2P"', 'cursive'],
+            },
             dropShadow: {
                 'glow': '0 0 10px rgba(59, 130, 246, 0.5)',
                 'glow-accent': '0 0 15px rgba(236, 72, 153, 0.7)',

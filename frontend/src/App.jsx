@@ -46,8 +46,14 @@ function App() {
                         <span className="hidden sm:inline font-semibold">Back to Home</span>
                     </button>
                 )}
-                <h1 className="text-5xl md:text-6xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-primary via-blue-400 to-accent drop-shadow-glow flex items-center justify-center">
-                    BINGO
+                <h1 
+                    className="text-4xl md:text-5xl font-pixel tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 flex items-center justify-center mt-6"
+                    style={{
+                        WebkitTextStroke: '1px rgba(255,255,255,0.1)',
+                        filter: 'drop-shadow(0 0 10px rgba(6, 182, 212, 0.8)) drop-shadow(0 0 20px rgba(217, 70, 239, 0.6))'
+                    }}
+                >
+                    CHILLINGO
                 </h1>
             </header>
 

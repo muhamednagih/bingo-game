@@ -1,23 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, MessageSquare } from 'lucide-react';
 
-export default function Chat({ messages, onSendMessage }) {
+export default function Chat({ messages, onSendMessage, currentPlayerName }) {
     const [msg, setMsg] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const endRef = useRef(null);
+    const audioRef = useRef(typeof Audio !== "undefined" ? new Audio('/notification.mp3') : null);
 
     // Initial scroll setup
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, isOpen]);
 
-    // Track unread messages
+    // Track unread messages and play sound
     useEffect(() => {
-        if (!isOpen && messages.length > 0) {
-            setUnreadCount(prev => prev + 1);
+        if (messages.length > 0) {
+            const lastMsg = messages[messages.length - 1];
+            const isFromMe = lastMsg.sender === currentPlayerName;
+
+            if (!isOpen && !isFromMe) {
+                setUnreadCount(prev => prev + 1);
+            }
+
+            if (!isFromMe && audioRef.current) {
+                audioRef.current.play().catch(e => console.warn('Audio play failed:', e));
+            }
         }
-    }, [messages]);
+    }, [messages, currentPlayerName]);
 
     // Reset unread count when opening
     useEffect(() => {

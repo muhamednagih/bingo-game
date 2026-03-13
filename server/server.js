@@ -67,13 +67,13 @@ io.on('connection', (socket) => {
         io.to(roomId).emit('roomState', res.room);
     });
 
-    socket.on('reconnectGame', ({ roomId, playerId }) => {
+    socket.on('rejoinRoom', ({ roomId, playerId }) => {
         const result = roomManager.reconnectGame(roomId, socket.id, playerId);
         if (result) {
             socket.join(roomId);
             socketRooms[socket.id] = roomId;
             // Emit the specific rehydration state only to this user
-            socket.emit('rehydrateState', result.playerState);
+            socket.emit('syncGameState', result);
             // Alert everyone else that the player is back
             io.to(roomId).emit('roomState', result.room);
         }

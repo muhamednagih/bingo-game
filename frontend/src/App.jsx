@@ -85,7 +85,11 @@ function App() {
             )}
 
             {roomId && (
-                <Chat messages={chatMessages} onSendMessage={sendMessage} />
+                <Chat 
+                    messages={chatMessages} 
+                    onSendMessage={sendMessage} 
+                    currentPlayerName={roomState?.players?.find(p => p.id === playerId)?.name} 
+                />
             )}
 
         </div>

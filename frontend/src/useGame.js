@@ -26,13 +26,30 @@ export function useGame() {
     const [chatMessages, setChatMessages] = useState([]);
     const [winners, setWinners] = useState(null);
 
+    const handleRejoin = useCallback(() => {
+        const savedRoomId = sessionStorage.getItem('bingoRoomId');
+        if (savedRoomId && socket.disconnected) {
+            socket.connect();
+        } else if (savedRoomId && socket.connected) {
+            socket.emit('rejoinRoom', { roomId: savedRoomId, playerId: getPlayerId() });
+        }
+    }, []);
+
     useEffect(() => {
         socket.on('connect', () => {
             setSocketId(socket.id);
             const savedRoomId = sessionStorage.getItem('bingoRoomId');
             if (savedRoomId) {
                 // Auto-reconnect if we have a saved room ID
-                socket.emit('reconnectGame', { roomId: savedRoomId, playerId: getPlayerId() });
+                socket.emit('rejoinRoom', { roomId: savedRoomId, playerId: getPlayerId() });
+            }
+        });
+
+        socket.on('syncGameState', (playerState) => {
+            if (playerState && playerState.room) {
+                setRoomId(playerState.room.id);
+                setRoomState(playerState.room);
+                setError(null);
             }
         });
 
@@ -88,10 +105,23 @@ export function useGame() {
             socket.off('error');
             socket.off('gameOver');
             socket.off('chatMessage');
-            socket.off('rehydrateState');
+            socket.off('syncGameState');
             socket.off('roomDestroyed');
         };
     }, []);
+
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                handleRejoin();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [handleRejoin]);
 
     const createRoom = useCallback((id, name, maxPlayers, boardSize) => {
         socket.emit('createRoom', { roomId: id, playerName: name, maxPlayers, boardSize, playerId: getPlayerId() });
